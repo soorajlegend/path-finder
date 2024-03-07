@@ -1,0 +1,27 @@
+datasource db {
+  // provider     = "mysql"
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  directUrl    = env("DATABASE_URL_UNPOOLED")
+  relationMode = "prisma"
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+enum SenderType {
+  YOU
+  MASAAR
+}
+
+model Chat {
+  id      String @id @default(uuid())
+  userId  String
+  sender  SenderType
+  message String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
