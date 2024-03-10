@@ -13,7 +13,8 @@ interface ChatMessage {
         sender: "YOU" | "MASAAR";
         message: string;
         createdAt: Date;
-    }
+    },
+    avatar: string
 }
 
 
@@ -32,11 +33,13 @@ const ResponseSkeleton = () => {
 }
 
 
-const ChatItem = ({ data }: ChatMessage) => {
+const ChatItem = ({ data, avatar }: ChatMessage) => {
 
     if (!data?.message.length) {
         return <ResponseSkeleton />
     }
+
+    console.log(avatar)
 
     const isMasaar = data.sender === "MASAAR"
 
@@ -54,7 +57,7 @@ const ChatItem = ({ data }: ChatMessage) => {
             className="py-2 w-full max-w-4xl mx-auto px-3 lg:px-0 ">
             <Card className={cn("relative w-full flex flex-col gap-y-1 p-3 pl-3 lg:pl-5  rounded-[10px] border-none shadow-none",
                 isMasaar ? "bg-slate-50" : "bg-slate-100")}>
-                <div className=" text-sm text-black">
+                <div className=" text-sm text-black overflow-x-auto styled-scrollbar">
                     <Markdown>
                         {data.message}
                     </Markdown>
@@ -67,7 +70,7 @@ const ChatItem = ({ data }: ChatMessage) => {
                     'w-6 h-6 absolute  bottom-0  translate-y-1/4 border-2 border-white ring-2 ring-white',
                     isMasaar ? "left-0 -translate-x-1/3" : "right-0 translate-x-1/3"
                 )}>
-                    <AvatarImage src={`/${isMasaar ? "logo.png" : "image1.jpeg"}`} />
+                    <AvatarImage src={`${isMasaar ? "/logo.png" : avatar}`} />
                     <AvatarFallback />
                 </Avatar>
             </Card>

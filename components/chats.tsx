@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import ChatItem from './chat-item';
 import { ChatType } from '@/app/(routes)/main/page';
+import { useUser } from '@clerk/nextjs';
 
 interface ChatProps {
     chats: ChatType[];
@@ -11,6 +12,8 @@ interface ChatProps {
 
 const Chats = ({ chats, isThinking }: ChatProps) => {
 
+
+    const { user } = useUser();
 
     const bottomContainerRef = useRef<HTMLDivElement>(null)
     const [isMounted, setIsMounted] = useState(false)
@@ -44,6 +47,7 @@ const Chats = ({ chats, isThinking }: ChatProps) => {
                             <ChatItem
                                 key={idx}
                                 data={chatMessage}
+                                avatar={user?.imageUrl || ''}
                             />
                         )
                     })
