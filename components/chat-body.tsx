@@ -1,15 +1,13 @@
 "use client"
 
 import { SaveNewMessage } from '@/actions/chat'
-import { Think } from '@/actions/transformer'
 import { ChatType } from '@/app/(routes)/main/page'
 import Chats from '@/components/chats'
 import { AnimatedTooltip } from '@/components/ui/animated-tooltip'
 import { Button } from '@/components/ui/button'
 import { IconMicrophone } from '@tabler/icons-react'
 import { Paperclip, SendHorizonal } from 'lucide-react'
-import React, { FormEventHandler, useEffect, useState, useTransition } from 'react'
-
+import React, { useEffect, useState, useTransition } from 'react'
 
 interface ChatBodyProps {
     userId: string;
@@ -18,87 +16,145 @@ interface ChatBodyProps {
 
 const ChatBody = ({ userId, chats }: ChatBodyProps) => {
 
-    const [isPending, startTransition] = useTransition();
-    const [lastMessage, setLastMessage] = useState<ChatType | null>(null);
-    const [prompt, setPrompt] = useState("");
-    const [isNewResponse, setIsNewResponse] = useState(false);
 
+    const [isPending, startTransition] = useTransition();
+    const [prompt, setPrompt] = useState("");
     const [allChats, setAllChats] = useState<ChatType[]>(chats);
+    const [stream, setStream] = useState("")
+    const [isStreaming, setIsStreaming] = useState(false)
+
+    const savePrompt = async (message: ChatType) => {
+
+        if (!message?.message) return;
+        setAllChats((state) => ([...state, message, {
+            message: "",
+            sender: "MASAAR",
+            createdAt: new Date()
+        }]))
+
+        await SaveNewMessage({
+            message: message.message,
+            sender: "YOU",
+            userId: userId
+        })
+    }
+    const saveResponse = async (response: string) => {
+        await SaveNewMessage({
+            message: response,
+            sender: "MASAAR",
+            userId: userId
+        })
+    }
 
     useEffect(() => {
-        if (!lastMessage) {
-            return
-        }
-        setAllChats((state) => ([...state, lastMessage]))
+        if(stream === "") return;
 
-        // save them to db
-
-        const saveMessage = async () => {
-
-            if (!lastMessage?.message) return;
-
-            if (lastMessage.sender === "MASAAR") {
-                await SaveNewMessage({
-                    message: lastMessage.message,
-                    sender: "MASAAR",
-                    userId: userId
-                })
-            } else {
-                await SaveNewMessage({
-                    message: lastMessage.message,
-                    sender: "YOU",
-                    userId: userId
-                })
-            }
-
+        if(!isStreaming) {
+            saveResponse(stream)
         }
 
-        saveMessage();
+        const updateLastObject = () => {
+            const lastChat = allChats[allChats.length - 1];
+            const updatedArray = [...allChats];
+            updatedArray[allChats.length - 1] = {
+                ...updatedArray[allChats.length - 1], ...{
+                    ...lastChat,
+                    message: stream
+                }
+            };
+            setAllChats(updatedArray);
+        };
 
-    }, [lastMessage])
+        updateLastObject();
+
+    }, [stream, isStreaming])
 
 
-    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!prompt) return;
 
-        setLastMessage({
+        savePrompt({
             sender: "YOU",
             message: prompt,
             createdAt: new Date()
         });
 
         setPrompt("");
-        setIsNewResponse(false);
+        setStream("");
 
-        startTransition(() => {
-            Think({
+        setIsStreaming(true);
+        const response = await fetch('/api/openai', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json' // Assuming JSON data
+            },
+            body: JSON.stringify({
                 memory: chats.map((chat) => ({
                     role: chat.sender === "MASAAR" ? "system" : "user",
                     content: chat.message,
                 })),
                 prompt
-            }).then((data: string | undefined) => {
-                setLastMessage({
-                    sender: "MASAAR",
-                    message: data || "I don't get your message, can you elaborate please?",
-                    createdAt: new Date()
-                });
-                setIsNewResponse(true);
-            })
+            }),
         });
+
+        // Check for successful response
+        if (!response.body || !response.ok) {
+            throw new Error(`API request failed with status: ${response.status}`);
+        }
+
+        const reader = response.body.getReader();
+
+
+        // Process data chunks in a loop
+        while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) {
+                setIsStreaming(false);
+                console.log("finished")
+                break;
+            }
+            setStream(state => state + new TextDecoder().decode(value))
+        }
+
+        reader.cancel();
+
+
+        // startTransition(() => {
+        //  Think({
+        //     memory: chats.map((chat) => ({
+        //         role: chat.sender === "MASAAR" ? "system" : "user",
+        //         content: chat.message,
+        //     })),
+        //     prompt
+        // }, 
+        // // userId, 
+        // stream, 
+        // // setStream
+        // )
+        // // .then((response: any) => {
+
+        // //     // setLastMessage({
+        // //     //     sender: "MASAAR",
+        // //     //     message: response?."I don't get your message, can you elaborate please?",
+        // //     //     createdAt: new Date()
+        // //     // });
+
+        // // })
+        // });
     };
 
 
     return (
         <div className="flex flex-col h-full w-full ">
-            <div className="flex-1 w-full h-full pb-[90px] ">
+            <div className="flex-1 w-full h-full pb-[90px] pt-20">
                 <Chats
                     chats={allChats}
                     isThinking={isPending}
-                    isNewResponse={isNewResponse}
                 />
+                {/* {stream} */}
             </div>
             {/* input */}
             <div className="h-[80px] w-full fixed bottom-0 bg-white py-2 px-3 lg:px-0">

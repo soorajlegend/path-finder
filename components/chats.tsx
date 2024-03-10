@@ -7,10 +7,9 @@ import { ChatType } from '@/app/(routes)/main/page';
 interface ChatProps {
     chats: ChatType[];
     isThinking: boolean;
-    isNewResponse: boolean
 }
 
-const Chats = ({ chats, isThinking, isNewResponse }: ChatProps) => {
+const Chats = ({ chats, isThinking }: ChatProps) => {
 
 
     const bottomContainerRef = useRef<HTMLDivElement>(null)
@@ -23,14 +22,18 @@ const Chats = ({ chats, isThinking, isNewResponse }: ChatProps) => {
     };
 
     useEffect(() => {
-        scrollToBottom();
-    }, [isThinking, chats]);
-    
-    useEffect(() => {
         setIsMounted(true)
     }, [])
-    
-    if(!isMounted) return null;
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [isThinking, chats]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [isMounted]);
+
+    if (!isMounted) return null;
 
     return (
         <div className='w-full h-full overflow-y-scroll '>
@@ -41,7 +44,6 @@ const Chats = ({ chats, isThinking, isNewResponse }: ChatProps) => {
                             <ChatItem
                                 key={idx}
                                 data={chatMessage}
-                                typeWriter={isNewResponse && idx === chats.length - 1}
                             />
                         )
                     })
@@ -49,7 +51,8 @@ const Chats = ({ chats, isThinking, isNewResponse }: ChatProps) => {
                 {isThinking && <div className="w-7 h-7 bg-black/50 rounded-full animate-pulse" />}
                 <div
                     ref={bottomContainerRef}
-                    className="py-5" />
+                    className="py-5"
+                />
             </div>
         </div>
     )

@@ -6,19 +6,40 @@ import { Card } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { TypewriterEffect } from './ui/typewriter-effect';
-import Typing from './ui/typing';
-
+import Markdown from 'react-markdown';
+import { Skeleton } from './ui/skeleton';
 interface ChatMessage {
     data: {
         sender: "YOU" | "MASAAR";
         message: string;
         createdAt: Date;
     }
-    typeWriter: boolean;
 }
 
-const ChatItem = ({ data, typeWriter }: ChatMessage) => {
+
+const ResponseSkeleton = () => {
+    return (
+        <div className="flex flex-col relative gap-y-2 p-3 my-3 rounded-[10] shadow-sm">
+            <Skeleton className='h-4 w-3/4' />
+            <Skeleton className='h-4 w-2/4' />
+            <div className="h-2 w-full" />
+            <Skeleton className='h-4 w-4/5' />
+            <Skeleton className='h-4 w-5/6' />
+            <Skeleton className='h-4 w-3/4' />
+            <Skeleton className='absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 ring-2 ring-white w-7 h-7 rounded-full' />
+        </div>
+    )
+}
+
+
+const ChatItem = ({ data }: ChatMessage) => {
+
+    if (!data?.message.length) {
+        return <ResponseSkeleton />
+    }
+
+    const isMasaar = data.sender === "MASAAR"
+
     return (
         <motion.div
             initial={{ rotateX: 70, translateX: 5, scale: 0.7, skewX: 10, }}
@@ -32,20 +53,21 @@ const ChatItem = ({ data, typeWriter }: ChatMessage) => {
             style={{ perspective: 500 }}
             className="py-2 w-full max-w-4xl mx-auto px-3 lg:px-0 ">
             <Card className={cn("relative w-full flex flex-col gap-y-1 p-3 pl-3 lg:pl-5  rounded-[10px] border-none shadow-none",
-                data.sender === "MASAAR" ? "bg-slate-100" : "bg-slate-50")}>
-                <p className="whitespace-pre-line text-sm text-black">
-                    {typeWriter ? (
-                        <Typing
-                        words={[data.message,]}
-                        />
-                    ) : data.message}
-                </p>
-                <span className="text-gray-500 text-xs">{format(data.createdAt, "hh:mm:aa")}</span>
+                isMasaar ? "bg-slate-50" : "bg-slate-100")}>
+                <div className=" text-sm text-black">
+                    <Markdown>
+                        {data.message}
+                    </Markdown>
+                </div>
+                <span className={cn(
+                    "text-gray-500 text-xs",
+                    isMasaar && "text-right"
+                )}>{format(data.createdAt, "hh:mm:aa")}</span>
                 <Avatar className={cn(
                     'w-6 h-6 absolute  bottom-0  translate-y-1/4 border-2 border-white ring-2 ring-white',
-                    data.sender === "MASAAR" ? "left-0 -translate-x-1/3" : "right-0 translate-x-1/3"
+                    isMasaar ? "left-0 -translate-x-1/3" : "right-0 translate-x-1/3"
                 )}>
-                    <AvatarImage src={`/${data.sender === "MASAAR" ? "image1.jpeg" : "image2.jpeg"}`} />
+                    <AvatarImage src={`/${isMasaar ? "logo.png" : "image1.jpeg"}`} />
                     <AvatarFallback />
                 </Avatar>
             </Card>

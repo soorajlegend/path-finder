@@ -1,40 +1,65 @@
-"use server"
+"use server";
 
 import { role } from "@/lib/utils";
 import OpenAI from "openai";
+import { OpenAIStream, StreamingTextResponse } from "ai";
 
 import fs from "fs";
 import path from "path";
+import { SaveNewMessage } from "./chat";
 
 const openai = new OpenAI();
 
 export type NewChat = {
-    prompt: string;
-    memory: {
-        "role": "system" | "user";
-        "content": string
-    }[]
+  prompt: string;
+  memory: {
+    role: "system" | "user";
+    content: string;
+  }[];
+};
+
+// export async function Think(data: NewChat) {
+
+//     if (!data.prompt) return;
+
+//     const completion = await openai.chat.completions.create({
+//         messages: [
+//             { "role": "system", "content": role},
+//             ...data.memory,
+//             { "role": "user", "content": data.prompt }
+//         ],
+//         model: process.env.OPENAI_API_MODEL || "gpt-3.5-turbo",
+//         temperature: 0.9,
+//     });
+
+//     return completion.choices[0].message.content || undefined;
+// }
+
+export async function Think(
+  data: NewChat,
+//   userId: string,
+  stream: string,
+//   setStream: (value: string) => void
+) {
+  if (!data.prompt) return;
+
+  const completion = await openai.chat.completions.create({
+    messages: [
+      { role: "system", content: role },
+      ...data.memory,
+      { role: "user", content: data.prompt },
+    ],
+    model: process.env.OPENAI_API_MODEL || "gpt-3.5-turbo",
+    temperature: 0.9,
+    stream: true,
+  });
+
+  for await (const chunk of completion) {
+    stream = chunk.choices[0]?.delta?.content || ""
+    // setStream(stream + update);
+    process.stdout.write(stream)
+  }
 }
-
-
-export async function Think(data: NewChat) {
-
-    if (!data.prompt) return;
-    
-    const completion = await openai.chat.completions.create({
-        messages: [
-            { "role": "system", "content": role},
-            ...data.memory,
-            { "role": "user", "content": data.prompt }
-        ],
-        model: "gpt-4-0125-preview",
-        temperature: 0.9,
-    });
-
-    return completion.choices[0].message.content || undefined;
-}
-
-
 
 const speechFile = path.resolve("./speech.mp3");
 
@@ -86,7 +111,7 @@ export async function TTS() {
 *Facilitator:* "Join us at Masaar. Together, we'll discover not just where you're going, but who you're meant to be. Your path is waiting."
     `,
   });
-  
+
   const buffer = Buffer.from(await mp3.arrayBuffer());
   await fs.promises.writeFile(speechFile, buffer);
 
