@@ -57,7 +57,7 @@ const ChatItem = ({ data, avatar }: ChatMessage) => {
             className="py-2 w-full max-w-4xl mx-auto px-3 lg:px-0 ">
             <Card className={cn("relative w-full flex flex-col gap-y-1 p-3 pl-3 lg:pl-5  rounded-[10px] border-none shadow-none",
                 isMasaar ? "bg-slate-50" : "bg-slate-100")}>
-                <div className=" text-sm text-black overflow-x-auto styled-scrollbar">
+                <div className=" text-sm text-black overflow-x-auto styled-scrollbar whitespace-pre-line">
                     <Markdown>
                         {data.message}
                     </Markdown>
