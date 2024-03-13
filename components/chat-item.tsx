@@ -1,6 +1,6 @@
 "use client"
 
-import React, {  useState } from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion';
 import { Card } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -54,7 +54,7 @@ const ChatItem = ({ data, avatar, isLast }: ChatMessage) => {
             onClick={() => setDisplayAll(!displayAll)}
         >
             <motion.div
-                initial={{ rotateX: 70, scale: 0.9, }}
+                initial={{ rotateX: 45, scale: 0.9, }}
                 whileInView={{ rotateX: 0, scale: 1, }}
                 transition={{
                     bounce: 1,
@@ -64,27 +64,28 @@ const ChatItem = ({ data, avatar, isLast }: ChatMessage) => {
                 }}
                 style={{ perspective: 500 }}
                 className="py-2 w-full max-w-4xl mx-auto px-3 lg:px-0 sticky top-0  ">
-                <Card className={cn("relative w-full flex flex-col gap-y-1 p-3 pl-3 lg:pl-5  rounded-[8px] border-none shadow-none overflow-y-visible border-white border-2",
-                    !isMasaar && "bg-slate-50")}>
-                    <div className={cn(
-                        " text-base text-black overflow-x-auto styled-scrollbar whitespace-pre-line transition",
-                        !displayAll && !isLast && "line-clamp-[10]"
-                    )}>
-                        <Markdown>
-                            {data.message}
-                        </Markdown>
-                    </div>
-                    <span className={cn(
-                        "text-gray-500 text-xs",
-                        isMasaar && "text-right"
-                    )}>{format(data.createdAt, "hh:mm:aa")}</span>
-                    <Avatar className={cn(
-                        'w-8 h-8 absolute  top-3 border-1 border-white ring-1 ring-white left-0 -translate-x-full -ml-3'
-                    )}>
+                <div className="flex w-full gap-3 relative">
+                    <Avatar className='w-8 h-8 border-1 border-white ring-1 ring-white '>
                         <AvatarImage src={`${isMasaar ? "/logo.png" : avatar}`} />
                         <AvatarFallback />
                     </Avatar>
-                </Card>
+                    <Card className={cn("relative overflow-hidden w-full flex flex-col gap-y-1 p-3 pl-3 lg:pl-5  rounded-[8px] border-none shadow-none border-white border-2",
+                        !isMasaar && "bg-slate-50")}>
+                        <div className={cn(
+                            "w-full  text-base text-black overflow-x-auto styled-scrollbar whitespace-pre-wrap transition",
+                            !displayAll && !isLast && "line-clamp-[10]"
+                        )}>
+                            <Markdown>
+                                {data.message}
+                            </Markdown>
+                        </div>
+                        <span className={cn(
+                            "text-gray-500 text-xs",
+                            isMasaar && "text-right"
+                        )}>{format(data.createdAt, "hh:mm:aa")}</span>
+                    </Card>
+
+                </div>
             </motion.div>
         </div>
     )
