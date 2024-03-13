@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, {  useState } from 'react'
 import { motion } from 'framer-motion';
 import { Card } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -14,7 +14,8 @@ interface ChatMessage {
         message: string;
         createdAt: Date;
     },
-    avatar: string
+    avatar: string;
+    isLast: boolean;
 }
 
 
@@ -33,48 +34,59 @@ const ResponseSkeleton = () => {
 }
 
 
-const ChatItem = ({ data, avatar }: ChatMessage) => {
+const ChatItem = ({ data, avatar, isLast }: ChatMessage) => {
+
+    const [displayAll, setDisplayAll] = useState(false);
 
     if (!data?.message.length) {
         return <ResponseSkeleton />
     }
 
-    console.log(avatar)
-
     const isMasaar = data.sender === "MASAAR"
 
     return (
-        <motion.div
-            initial={{ rotateX: 70, translateX: 5, scale: 0.7, skewX: 10, }}
-            whileInView={{ rotateX: 0, translateX: 0, scale: 1, skewX: 0, }}
-            transition={{
-                bounce: 1,
-                duration: 0.5,
-                ease: "easeInOut"
+        <div
+            className={cn(
+                " top-0 w-full h-full flex bg-white overflows-y-scroll hidden-sjcrollbar rounded-[10px] cursor-pointer",
+                displayAll || isLast ? "relative" : "sticky"
 
-            }}
-            style={{ perspective: 500 }}
-            className="py-2 w-full max-w-4xl mx-auto px-3 lg:px-0">
-            <Card className={cn("relative w-full flex flex-col gap-y-1 p-3 pl-3 lg:pl-5  rounded-[10px] border-none shadow-none",
-                isMasaar ? "bg-slate-50" : "bg-slate-100")}>
-                <div className=" text-base text-black overflow-x-auto styled-scrollbar whitespace-pre-line">
-                    <Markdown>
-                        {data.message}
-                    </Markdown>
-                </div>
-                <span className={cn(
-                    "text-gray-500 text-xs",
-                    isMasaar && "text-right"
-                )}>{format(data.createdAt, "hh:mm:aa")}</span>
-                <Avatar className={cn(
-                    'w-6 h-6 absolute  bottom-0  translate-y-1/4 border-2 border-white ring-2 ring-white',
-                    isMasaar ? "left-0 -translate-x-1/3" : "right-0 translate-x-1/3"
-                )}>
-                    <AvatarImage src={`${isMasaar ? "/logo.png" : avatar}`} />
-                    <AvatarFallback />
-                </Avatar>
-            </Card>
-        </motion.div>
+            )}
+            onClick={() => setDisplayAll(!displayAll)}
+        >
+            <motion.div
+                initial={{ rotateX: 70, scale: 0.9, }}
+                whileInView={{ rotateX: 0, scale: 1, }}
+                transition={{
+                    bounce: 1,
+                    duration: 0.5,
+                    ease: "easeInOut"
+
+                }}
+                style={{ perspective: 500 }}
+                className="py-2 w-full max-w-4xl mx-auto px-3 lg:px-0 sticky top-0  ">
+                <Card className={cn("relative w-full flex flex-col gap-y-1 p-3 pl-3 lg:pl-5  rounded-[8px] border-none shadow-none overflow-y-visible border-white border-2",
+                    !isMasaar && "bg-slate-50")}>
+                    <div className={cn(
+                        " text-base text-black overflow-x-auto styled-scrollbar whitespace-pre-line transition",
+                        !displayAll && !isLast && "line-clamp-[10]"
+                    )}>
+                        <Markdown>
+                            {data.message}
+                        </Markdown>
+                    </div>
+                    <span className={cn(
+                        "text-gray-500 text-xs",
+                        isMasaar && "text-right"
+                    )}>{format(data.createdAt, "hh:mm:aa")}</span>
+                    <Avatar className={cn(
+                        'w-8 h-8 absolute  top-3 border-1 border-white ring-1 ring-white left-0 -translate-x-full -ml-3'
+                    )}>
+                        <AvatarImage src={`${isMasaar ? "/logo.png" : avatar}`} />
+                        <AvatarFallback />
+                    </Avatar>
+                </Card>
+            </motion.div>
+        </div>
     )
 }
 
