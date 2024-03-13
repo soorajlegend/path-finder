@@ -106,7 +106,6 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
 
         const reader = response.body.getReader();
 
-
         // Process data chunks in a loop
         while (true) {
             const { done, value } = await reader.read();
@@ -120,36 +119,12 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
         }
 
         reader.cancel();
-
-
-        // startTransition(() => {
-        //  Think({
-        //     memory: chats.map((chat) => ({
-        //         role: chat.sender === "MASAAR" ? "system" : "user",
-        //         content: chat.message,
-        //     })),
-        //     prompt
-        // }, 
-        // // userId, 
-        // stream, 
-        // // setStream
-        // )
-        // // .then((response: any) => {
-
-        // //     // setLastMessage({
-        // //     //     sender: "MASAAR",
-        // //     //     message: response?."I don't get your message, can you elaborate please?",
-        // //     //     createdAt: new Date()
-        // //     // });
-
-        // // })
-        // });
     };
 
 
     return (
         <div className="flex flex-col h-full w-full ">
-            <div className="flex-1 w-full h-full pb-[90px] pt-20">
+            <div className="flex-1 w-full h-full pb-[90px] pt-20 overflow-hidden">
                 <Chats
                     chats={allChats}
                     isThinking={isPending}
