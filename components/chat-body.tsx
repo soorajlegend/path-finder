@@ -123,8 +123,8 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
 
 
     return (
-        <div className="flex flex-col h-full w-full ">
-            <div className="flex-1 w-full h-full pb-[90px] pt-20 overflow-hidden">
+        <div className="flex flex-col h-full w-full">
+            <div className="flex-1 w-full h-full pb-[90px]  pt-[60px] md:pt-[70px] overflow-hidden">
                 <Chats
                     chats={allChats}
                     isThinking={isPending}
