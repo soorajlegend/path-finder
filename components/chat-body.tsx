@@ -38,6 +38,8 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
             userId: userId
         })
     }
+
+
     const saveResponse = async (response: string) => {
         await SaveNewMessage({
             message: response,
@@ -47,9 +49,9 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
     }
 
     useEffect(() => {
-        if(stream === "") return;
+        if (stream === "") return;
 
-        if(!isStreaming) {
+        if (!isStreaming) {
             saveResponse(stream)
         }
 
@@ -75,6 +77,9 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
 
         if (!prompt) return;
 
+        // get the history before adding the prompt
+        const history = [...allChats]
+
         savePrompt({
             sender: "YOU",
             message: prompt,
@@ -91,11 +96,15 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
                 'Content-Type': 'application/json' // Assuming JSON data
             },
             body: JSON.stringify({
-                memory: chats.map((chat) => ({
+                memory: [...history.map((chat) => ({
                     role: chat.sender === "MASAAR" ? "assistant" : "user",
                     content: chat.message,
                 })),
-                prompt
+                {
+                    role: "user",
+                    content: prompt
+                }
+                ],
             }),
         });
 
