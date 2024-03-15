@@ -27,7 +27,7 @@ const MainPage = async () => {
       <div className="flex items-center h-[50px] md:h-[60px] fixed top-0 z-50 bg-white py-2 w-full px-4 sm:px-6 lg:px-0">
         <div className="w-full max-w-5xl mx-auto flex justify-between items-center ">
           <Image src="/logo.png" alt="logo" width={40} height={40} />
-          <UserButton />
+          <UserButton afterSignOutUrl='/' />
         </div>
       </div>
       {/* body */}

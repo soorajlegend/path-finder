@@ -85,14 +85,14 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
         setStream("");
 
         setIsStreaming(true);
-        const response = await fetch('/api/openai', {
+        const response = await fetch('/api/anthropic', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json' // Assuming JSON data
             },
             body: JSON.stringify({
                 memory: chats.map((chat) => ({
-                    role: chat.sender === "MASAAR" ? "system" : "user",
+                    role: chat.sender === "MASAAR" ? "assistant" : "user",
                     content: chat.message,
                 })),
                 prompt

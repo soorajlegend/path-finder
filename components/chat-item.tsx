@@ -21,14 +21,16 @@ interface ChatMessage {
 
 const ResponseSkeleton = () => {
     return (
-        <div className="flex flex-col relative gap-y-2 p-3 my-3 rounded-[10] shadow-sm">
-            <Skeleton className='h-4 w-3/4' />
-            <Skeleton className='h-4 w-2/4' />
-            <div className="h-2 w-full" />
-            <Skeleton className='h-4 w-4/5' />
-            <Skeleton className='h-4 w-5/6' />
-            <Skeleton className='h-4 w-3/4' />
-            <Skeleton className='absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 ring-2 ring-white w-7 h-7 rounded-full' />
+        <div className="flex relative p-3 my-3">
+            <Skeleton className='ring-2 ring-white w-8 h-8 rounded-full' />
+            <div className="flex flex-col gap-y-2  rounded-[10px] shadow-sm">
+                <Skeleton className='h-4 w-3/4' />
+                <Skeleton className='h-4 w-2/4' />
+                <div className="h-2 w-full" />
+                <Skeleton className='h-4 w-4/5' />
+                <Skeleton className='h-4 w-5/6' />
+                <Skeleton className='h-4 w-3/4' />
+            </div>
         </div>
     )
 }
