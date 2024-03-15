@@ -22,11 +22,7 @@ export async function POST(req: Request) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const { memory, prompt } = await req.json();
-
-  if (!prompt) {
-    return new NextResponse("No prompt provided", { status: 400 });
-  }
+  const { memory } = await req.json();
 
   // Ask Claude for a streaming chat completion given the prompt
   const response = await anthropic.messages.create({
@@ -34,11 +30,10 @@ export async function POST(req: Request) {
       { role: "user", content: role },
       { role: "assistant", content: "Noted" },
       ...memory,
-      { role: "user", content: prompt },
     ],
     model: "claude-3-opus-20240229",
     stream: true,
-    max_tokens: 1000,
+    max_tokens: 300,
   });
 
   // Convert the response into a friendly text-stream
