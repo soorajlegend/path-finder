@@ -21,9 +21,9 @@ interface ChatMessage {
 
 const ResponseSkeleton = () => {
     return (
-        <div className="flex relative p-3 my-3">
-            <Skeleton className='ring-2 ring-white w-8 h-8 rounded-full' />
-            <div className="flex flex-col gap-y-2  rounded-[10px] shadow-sm">
+        <div className="flex flex-row justify-start items-start gap-x-3 relative p-3 my-3">
+            <Skeleton className='ring-2 ring-white w-9 h-9 rounded-full' />
+            <div className="w-full flex flex-col gap-y-2 rounded-[10px] shadow-sm">
                 <Skeleton className='h-4 w-3/4' />
                 <Skeleton className='h-4 w-2/4' />
                 <div className="h-2 w-full" />
