@@ -7,7 +7,7 @@ import { AnimatedTooltip } from '@/components/ui/animated-tooltip'
 import { Button } from '@/components/ui/button'
 import { IconMicrophone } from '@tabler/icons-react'
 import { Paperclip, SendHorizonal } from 'lucide-react'
-import React, { useEffect, useState, useTransition } from 'react'
+import React, { KeyboardEvent, useEffect, useState, useTransition } from 'react'
 
 interface ChatBodyProps {
     userId: string;
@@ -72,7 +72,7 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
     }, [stream, isStreaming])
 
 
-    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = async (e: React.FormEvent<HTMLFormElement> | KeyboardEvent<HTMLTextAreaElement>) => {
         e.preventDefault();
 
         if (!prompt) return;
@@ -145,11 +145,17 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
                 <form onSubmit={onSubmit}>
                     <div className="w-full max-w-4xl mx-auto flex items-center  ring-1 ring-slate-300 px-5 py-2 rounded-[10px]">
                         <Paperclip className='w-5 h-5  text-slate-500' />
-                        <input
+                        <textarea
                             value={prompt}
                             placeholder='send a message'
                             onChange={(e) => setPrompt(e.target.value)}
-                            className='w-full border-1 border-blue-100 p-2 ml-2  outline-none focus-visible:ring-0 focus-visible:border-none '
+                            rows={1}
+                            className='w-full border-1 border-blue-100 p-2 ml-2  outline-none focus-visible:ring-0 focus-visible:border-none resize-none hidden-scrollbar'
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    onSubmit(e);
+                                }
+                            }}
                         />
                         {
                             !!prompt ? (
