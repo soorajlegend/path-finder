@@ -19,9 +19,11 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
 
     const [isPending, startTransition] = useTransition();
     const [prompt, setPrompt] = useState("");
+    const [unSavedPrompt, setUnSavedPrompt] = useState("");
     const [allChats, setAllChats] = useState<ChatType[]>(chats);
     const [stream, setStream] = useState("")
     const [isStreaming, setIsStreaming] = useState(false)
+    
 
     const savePrompt = async (message: ChatType) => {
 
@@ -31,16 +33,17 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
             sender: "MASAAR",
             createdAt: new Date()
         }]))
-
-        await SaveNewMessage({
-            message: message.message,
-            sender: "YOU",
-            userId: userId
-        })
     }
 
 
     const saveResponse = async (response: string) => {
+
+        await SaveNewMessage({
+            message: unSavedPrompt,
+            sender: "YOU",
+            userId: userId
+        })
+
         await SaveNewMessage({
             message: response,
             sender: "MASAAR",
@@ -80,12 +83,14 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
         // get the history before adding the prompt
         const history = [...allChats]
 
+        
+
         savePrompt({
             sender: "YOU",
             message: prompt,
             createdAt: new Date()
         });
-
+        setUnSavedPrompt(prompt);
         setPrompt("");
         setStream("");
 

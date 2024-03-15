@@ -38,7 +38,7 @@ const ResponseSkeleton = () => {
 
 const ChatItem = ({ data, avatar, isLast }: ChatMessage) => {
 
-    const [displayAll, setDisplayAll] = useState(false);
+    const [displayAll, setDisplayAll] = useState(true);
 
     if (!data?.message.length) {
         return <ResponseSkeleton />
@@ -49,11 +49,11 @@ const ChatItem = ({ data, avatar, isLast }: ChatMessage) => {
     return (
         <div
             className={cn(
-                " top-0 w-full h-full flex bg-white overflows-y-scroll hidden-sjcrollbar rounded-[10px] cursor-pointer",
-                displayAll || isLast ? "relative" : "sticky"
+                " top-0 w-full h-full flex bg-white overflows-y-scroll hidden-scrollbar rounded-[10px] cursor-pointer",
+                displayAll || isLast ? "relative" : "relative"
 
             )}
-            onClick={() => setDisplayAll(!displayAll)}
+            // onClick={() => setDisplayAll(!displayAll)}
         >
             <motion.div
                 initial={{ rotateX: 45, scale: 0.9, }}
