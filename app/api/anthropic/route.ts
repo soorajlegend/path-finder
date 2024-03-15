@@ -1,23 +1,20 @@
-import OpenAI from "openai";
-import { OpenAIStream, StreamingTextResponse } from "ai";
 import { role } from "@/lib/utils";
-import { NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs";
+import { AnthropicStream, StreamingTextResponse } from "ai";
+import { NextResponse } from "next/server";
 
-const openai = new OpenAI();
+// Create an Anthropic API client (that's edge friendly)
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY || "",
+});
 
-export type NewChat = {
-  prompt: string;
-  memory: {
-    role: "system" | "user";
-    content: string;
-  }[];
-};
 
+
+// IMPORTANT! Set the runtime to edge
 export const runtime = "edge";
 
 export async function POST(req: Request) {
-  // Extract the `prompt` from the body of the request
 
   const { userId } = auth();
 
@@ -31,20 +28,21 @@ export async function POST(req: Request) {
     return new NextResponse("No prompt provided", { status: 400 });
   }
 
-  const completion = await openai.chat.completions.create({
+  // Ask Claude for a streaming chat completion given the prompt
+  const response = await anthropic.messages.create({
     messages: [
-      { role: "system", content: role },
+      { role: "user", content: role },
+      { role: "assistant", content: "Noted" },
       ...memory,
       { role: "user", content: prompt },
     ],
-    model: process.env.OPENAI_API_MODEL || "gpt-3.5-turbo",
-    temperature: 0.9,
+    model: "claude-3-opus-20240229",
     stream: true,
+    max_tokens: 1000,
   });
 
-
   // Convert the response into a friendly text-stream
-  const stream = OpenAIStream(completion);
+  const stream = AnthropicStream(response);
 
   // Respond with the stream
   return new StreamingTextResponse(stream);

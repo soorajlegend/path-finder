@@ -85,14 +85,14 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
         setStream("");
 
         setIsStreaming(true);
-        const response = await fetch('/api/openai', {
+        const response = await fetch('/api/anthropic', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json' // Assuming JSON data
             },
             body: JSON.stringify({
                 memory: chats.map((chat) => ({
-                    role: chat.sender === "MASAAR" ? "system" : "user",
+                    role: chat.sender === "MASAAR" ? "assistant" : "user",
                     content: chat.message,
                 })),
                 prompt
@@ -123,8 +123,8 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
 
 
     return (
-        <div className="flex flex-col h-full w-full ">
-            <div className="flex-1 w-full h-full pb-[90px] pt-20 overflow-hidden">
+        <div className="flex flex-col h-full w-full">
+            <div className="flex-1 w-full h-full pb-[90px]  pt-[60px] md:pt-[70px] overflow-hidden">
                 <Chats
                     chats={allChats}
                     isThinking={isPending}
