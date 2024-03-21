@@ -7,7 +7,7 @@ import { AnimatedTooltip } from '@/components/ui/animated-tooltip'
 import { Button } from '@/components/ui/button'
 import { IconMicrophone } from '@tabler/icons-react'
 import { Paperclip, SendHorizonal } from 'lucide-react'
-import React, { useEffect, useState, useTransition } from 'react'
+import React, { KeyboardEvent, useEffect, useState, useTransition } from 'react'
 
 interface ChatBodyProps {
     userId: string;
@@ -19,9 +19,11 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
 
     const [isPending, startTransition] = useTransition();
     const [prompt, setPrompt] = useState("");
+    const [unSavedPrompt, setUnSavedPrompt] = useState("");
     const [allChats, setAllChats] = useState<ChatType[]>(chats);
     const [stream, setStream] = useState("")
     const [isStreaming, setIsStreaming] = useState(false)
+    
 
     const savePrompt = async (message: ChatType) => {
 
@@ -31,14 +33,17 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
             sender: "MASAAR",
             createdAt: new Date()
         }]))
+    }
+
+
+    const saveResponse = async (response: string) => {
 
         await SaveNewMessage({
-            message: message.message,
+            message: unSavedPrompt,
             sender: "YOU",
             userId: userId
         })
-    }
-    const saveResponse = async (response: string) => {
+
         await SaveNewMessage({
             message: response,
             sender: "MASAAR",
@@ -47,9 +52,9 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
     }
 
     useEffect(() => {
-        if(stream === "") return;
+        if (stream === "") return;
 
-        if(!isStreaming) {
+        if (!isStreaming) {
             saveResponse(stream)
         }
 
@@ -70,32 +75,41 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
     }, [stream, isStreaming])
 
 
-    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = async (e: React.FormEvent<HTMLFormElement> | KeyboardEvent<HTMLTextAreaElement>) => {
         e.preventDefault();
 
         if (!prompt) return;
+
+        // get the history before adding the prompt
+        const history = [...allChats]
+
+        
 
         savePrompt({
             sender: "YOU",
             message: prompt,
             createdAt: new Date()
         });
-
+        setUnSavedPrompt(prompt);
         setPrompt("");
         setStream("");
 
         setIsStreaming(true);
-        const response = await fetch('/api/openai', {
+        const response = await fetch('/api/anthropic', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json' // Assuming JSON data
             },
             body: JSON.stringify({
-                memory: chats.map((chat) => ({
-                    role: chat.sender === "MASAAR" ? "system" : "user",
+                memory: [...history.map((chat) => ({
+                    role: chat.sender === "MASAAR" ? "assistant" : "user",
                     content: chat.message,
                 })),
-                prompt
+                {
+                    role: "user",
+                    content: prompt
+                }
+                ],
             }),
         });
 
@@ -105,7 +119,6 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
         }
 
         const reader = response.body.getReader();
-
 
         // Process data chunks in a loop
         while (true) {
@@ -120,36 +133,12 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
         }
 
         reader.cancel();
-
-
-        // startTransition(() => {
-        //  Think({
-        //     memory: chats.map((chat) => ({
-        //         role: chat.sender === "MASAAR" ? "system" : "user",
-        //         content: chat.message,
-        //     })),
-        //     prompt
-        // }, 
-        // // userId, 
-        // stream, 
-        // // setStream
-        // )
-        // // .then((response: any) => {
-
-        // //     // setLastMessage({
-        // //     //     sender: "MASAAR",
-        // //     //     message: response?."I don't get your message, can you elaborate please?",
-        // //     //     createdAt: new Date()
-        // //     // });
-
-        // // })
-        // });
     };
 
 
     return (
-        <div className="flex flex-col h-full w-full ">
-            <div className="flex-1 w-full h-full pb-[90px] pt-20">
+        <div className="flex flex-col h-full w-full">
+            <div className="flex-1 w-full h-full pb-[90px]  pt-[60px] md:pt-[70px] overflow-hidden">
                 <Chats
                     chats={allChats}
                     isThinking={isPending}
@@ -161,11 +150,17 @@ const ChatBody = ({ userId, chats }: ChatBodyProps) => {
                 <form onSubmit={onSubmit}>
                     <div className="w-full max-w-4xl mx-auto flex items-center  ring-1 ring-slate-300 px-5 py-2 rounded-[10px]">
                         <Paperclip className='w-5 h-5  text-slate-500' />
-                        <input
+                        <textarea
                             value={prompt}
                             placeholder='send a message'
                             onChange={(e) => setPrompt(e.target.value)}
-                            className='w-full border-1 border-blue-100 p-2 ml-2  outline-none focus-visible:ring-0 focus-visible:border-none '
+                            rows={1}
+                            className='w-full border-1 border-blue-100 p-2 ml-2  outline-none focus-visible:ring-0 focus-visible:border-none resize-none hidden-scrollbar'
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    onSubmit(e);
+                                }
+                            }}
                         />
                         {
                             !!prompt ? (

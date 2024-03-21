@@ -10,6 +10,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.18.0",
     "@clerk/nextjs": "^4.29.9",
     "@prisma/client": "^5.10.2",
     "@radix-ui/react-avatar": "^1.0.4",

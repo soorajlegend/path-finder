@@ -25,34 +25,20 @@ export async function POST(req: Request) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const { memory, prompt } = await req.json();
+  const { memory } = await req.json();
 
-  if (!prompt) {
-    return new NextResponse("No prompt provided", { status: 400 });
-  }
-
+ 
   const completion = await openai.chat.completions.create({
     messages: [
       { role: "system", content: role },
       ...memory,
-      { role: "user", content: prompt },
+      // { role: "user", content: prompt },
     ],
     model: process.env.OPENAI_API_MODEL || "gpt-3.5-turbo",
     temperature: 0.9,
     stream: true,
   });
 
-  // const stream = OpenAIStream(completion, {
-  //   async onCompletion(completion) {
-  //     await db.chat.create({
-  //       data: {
-  //         message: completion,
-  //         sender: "MASAAR",
-  //         userId: userId,
-  //       },
-  //     });
-  //   },
-  // });
 
   // Convert the response into a friendly text-stream
   const stream = OpenAIStream(completion);
